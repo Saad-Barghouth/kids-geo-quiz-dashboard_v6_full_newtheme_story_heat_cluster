@@ -69,14 +69,14 @@ function mkIcon(em: string, active: boolean) {
 
 const BASEMAPS: Record<BaseMapId, { url: string; attribution: string }> = {
   dark: {
-    url: "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
-    attribution: "© Stadia Maps",
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    attribution: "© OpenStreetMap contributors, © CARTO",
   },
   osm: { url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", attribution: "© OpenStreetMap contributors" },
   hot: { url: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", attribution: "© OpenStreetMap contributors, HOT" },
-  carto: { url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", attribution: "© CARTO" },
+  carto: { url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", attribution: "© OpenStreetMap contributors, © CARTO" },
   esri: { url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", attribution: "© Esri" },
-  nova: { url: "https://tiles.stadiamaps.com/tiles/alidade_radar/{z}/{x}/{y}.png", attribution: "© Stadia Maps" },
+  nova: { url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", attribution: "© OpenStreetMap contributors, © CARTO" },
 };
 
 const categoryColors: Record<PlaceCategory, string> = {
@@ -116,6 +116,8 @@ export default function MapStage(props: {
   layers: Layers;
   filters: CategoryFilter;
   baseMap: BaseMapId;
+  voiceEnabled: boolean;
+  autoSpeak: boolean;
   activePlaceId: string | null;
   highlightIds: string[];
   draw: DrawAction[];
@@ -125,7 +127,7 @@ export default function MapStage(props: {
   setFilters: (filters: CategoryFilter) => void;
   onClosePlace: () => void;
 }) {
-  const { lesson, layers, filters, baseMap, activePlaceId, highlightIds, draw, discovered, xp, onSelectPlace, onClosePlace } = props;
+  const { lesson, layers, filters, baseMap, voiceEnabled, autoSpeak, activePlaceId, highlightIds, draw, discovered, xp, onSelectPlace, onClosePlace } = props;
   const { setFilters } = props;
 
   const [zoomIndex, setZoomIndex] = useState(1);
@@ -432,6 +434,8 @@ export default function MapStage(props: {
         lesson={lesson}
         place={activePlace}
         discovered={discovered}
+        voiceEnabled={voiceEnabled}
+        autoSpeak={autoSpeak}
         onClose={onClosePlace}
         onNavigateNext={() => {
           const idx = lesson.places.findIndex((p) => p.id === activePlaceId);

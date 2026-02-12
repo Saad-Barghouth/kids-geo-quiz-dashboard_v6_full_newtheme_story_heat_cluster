@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Lesson, Place } from "../types";
 
-function speak(text: string) {
+function speak(text: string, onDone?: () => void) {
   try {
     const synth = window.speechSynthesis;
     if (!synth) return;
@@ -15,9 +15,11 @@ function speak(text: string) {
     u.lang = ar?.lang || "ar-EG";
     u.rate = 1.02;
     u.pitch = 1.05;
+    u.onend = () => onDone?.();
+    u.onerror = () => onDone?.();
     synth.speak(u);
   } catch {
-    // ignore
+    onDone?.();
   }
 }
 
@@ -25,11 +27,13 @@ export default function PlaceDrawer(props: {
   lesson: Lesson;
   place: Place | null;
   discovered: Set<string>;
+  voiceEnabled: boolean;
+  autoSpeak: boolean;
   onClose: () => void;
   onNavigateNext: () => void;
   xp: number;
 }) {
-  const { place, onClose, onNavigateNext, discovered, xp } = props;
+  const { place, onClose, onNavigateNext, discovered, xp, voiceEnabled, autoSpeak } = props;
   const [speaking, setSpeaking] = useState(false);
 
   const speakText = useMemo(() => {
@@ -42,6 +46,12 @@ export default function PlaceDrawer(props: {
     return lines.join(" ");
   }, [place]);
 
+  useEffect(() => {
+    if (!place || !voiceEnabled || !autoSpeak) return;
+    setSpeaking(true);
+    speak(speakText, () => setSpeaking(false));
+  }, [place?.id, voiceEnabled, autoSpeak, speakText]);
+
   const onSpeak = () => {
     if (!place) return;
     if (speaking) {
@@ -49,10 +59,8 @@ export default function PlaceDrawer(props: {
       setSpeaking(false);
       return;
     }
-    speak(speakText);
     setSpeaking(true);
-    // stop flag automatically after a while
-    window.setTimeout(() => setSpeaking(false), 9000);
+    speak(speakText, () => setSpeaking(false));
   };
 
   return (
